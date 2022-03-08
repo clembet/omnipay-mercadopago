@@ -20,16 +20,6 @@ class CaptureRequest extends AbstractRequest
         return $data;
     }
 
-    public function getTransactionID()
-    {
-        return $this->getParameter('transactionId');
-    }
-
-    public function setTransactionID($value)
-    {
-        return $this->setParameter('transactionId', $value);
-    }
-
     protected function getEndpoint()
     {
         $endPoint = parent::getEndpoint();

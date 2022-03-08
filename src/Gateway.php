@@ -86,6 +86,12 @@ class Gateway extends AbstractGateway
         return $this->setParameter('accessToken', $value);
     }
 
+    public function parseResponse($data)
+    {
+        $request = $this->createRequest('\Omnipay\MercadoPago\Message\PurchaseRequest', []);
+        return new \Omnipay\MercadoPago\Message\Response($request, (array)$data);
+    }
+
     /**
      * Authorize Request
      *

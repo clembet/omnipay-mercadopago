@@ -1,6 +1,8 @@
 <?php namespace Omnipay\MercadoPago\Message;
 
 
+use Omnipay\Common\Exception\InvalidRequestException;
+
 abstract class AbstractRequest extends \Omnipay\Common\Message\AbstractRequest
 {
     protected $liveEndpoint = 'https://api.mercadopago.com';
@@ -148,6 +150,155 @@ abstract class AbstractRequest extends \Omnipay\Common\Message\AbstractRequest
         $this->setParameter('customer_name', $value);
     }
 
+    public function getPaymentType()
+    {
+        return $this->getParameter('paymentType');
+    }
+
+    public function setPaymentType($value)
+    {
+        $this->setParameter('paymentType', $value);
+    }
+
+    public function getDueDate()
+    {
+        $dueDate = $this->getParameter('dueDate');
+        if($dueDate)
+            return $dueDate;
+
+        $time = localtime(time());
+        $ano = $time[5]+1900;
+        $mes = $time[4]+1+1;
+        $dia = 1;// $time[3];
+        if($mes>12)
+        {
+            $mes=1;
+            ++$ano;
+        }
+
+        $dueDate = sprintf("%04d-%02d-%02d", $ano, $mes, $dia);
+        $this->setDueDate($dueDate);
+
+        return $dueDate;
+    }
+
+    public function setDueDate($value)
+    {
+        return $this->setParameter('dueDate', $value);
+    }
+
+    public function getCustomer()
+    {
+        return $this->getParameter('customer');
+    }
+
+    public function setCustomer($value)
+    {
+        return $this->setParameter('customer', $value);
+    }
+
+    public function setExtraAmount($value)
+    {
+        return $this->setParameter('extraAmount', $value);
+    }
+
+    public function getExtraAmount()//TODO: refazer
+    {
+        $extraAmount = $this->getParameter('extraAmount');
+
+        if ($extraAmount !== null && $extraAmount !== 0) {
+            if ($this->getCurrencyDecimalPlaces() > 0) {
+                if (is_int($extraAmount) || (is_string($extraAmount) && strpos((string)$extraAmount, '.') === false)) {
+                    throw new InvalidRequestException(
+                        'Please specify extra amount as a string or float, with decimal places.'
+                    );
+                }
+            }
+
+            // Check for rounding that may occur if too many significant decimal digits are supplied.
+            $decimal_count = strlen(substr(strrchr(sprintf('%.8g', $extraAmount), '.'), 1));
+            if ($decimal_count > $this->getCurrencyDecimalPlaces()) {
+                throw new InvalidRequestException('Amount precision is too high for currency.');
+            }
+
+            return $this->formatCurrency($extraAmount);
+        }
+    }
+
+    public function getShipment()
+    {
+        $card = $this->getCard();
+        return [
+            "receiver_address"=> [
+                "zip_code"=> $card->getShippingPostcode(),
+                "state_name"=> $card->getShippingState(),
+                "city_name"=> $card->getShippingCity(),
+                "street_name"=> $card->getShippingAddress1(),
+                "street_number"=> $card->getShippingNumber()
+            ]
+        ];
+    }
+
+    public function getPayerData()
+    {
+        $card = $this->getCard();
+
+        return [
+            "first_name"=> $card->getFirstName(),
+            "last_name"=> $card->getLastName(),
+            "phone"=> [
+                "area_code"=> $card->getAreaCode(),
+                "number"=> substr($card->getPhone(), 2, 9)
+            ],
+            "address"=> [
+                "zip_code"=> $card->getShippingPostcode(),
+                "street_name"=> $card->getShippingAddress1(),
+                "street_number"=> $card->getShippingNumber()
+            ]
+        ];
+    }
+
+    public function getItemData()
+    {
+        $data = [];
+        $items = $this->getItems();
+
+        if ($items) {
+            foreach ($items as $n => $item) {
+                $item_array = [];
+                $item_array['id'] = $n+1;
+                $item_array['title'] = $item->getName();
+                $item_array['description'] = $item->getName();
+                //$item_array['category_id'] = $item->getCategoryId();
+                $item_array['quantity'] = (int)$item->getQuantity();
+                //$item_array['currency_id'] = $this->getCurrency();
+                $item_array['unit_price'] = (double)($this->formatCurrency($item->getPrice()));
+
+                array_push($data, $item_array);
+            }
+        }
+
+        return $data;
+    }
+
+    public function getCardToken()
+    {
+        return $this->getParameter('cardToken');
+    }
+    public function setCardToken($value)
+    {
+        $this->setParameter('cardToken', $value);
+    }
+
+    public function getTransactionID()
+    {
+        return $this->getParameter('transactionId');
+    }
+
+    public function setTransactionID($value)
+    {
+        return $this->setParameter('transactionId', $value);
+    }
 
     protected function createResponse($data)
     {
