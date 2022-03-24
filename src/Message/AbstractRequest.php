@@ -333,4 +333,126 @@ abstract class AbstractRequest extends \Omnipay\Common\Message\AbstractRequest
         }
         return str_replace('\\/', '/', json_encode($data, $options));
     }
+
+    public function getDataCreditCard()
+    {
+        $this->validate('cardToken');
+
+        $payer = $this->getPayerData();
+        $card = $this->getCard();
+
+        $data = [
+            "token"=> $this->getCardToken(),
+            "capture"=> false,
+            "binary_mode"=>true,
+            "transaction_amount"=> (float)$this->getAmount(),
+            "installments"=> $this->getInstallments(),
+            "description"=> $this->getSoftDescriptor(),
+            "external_reference"=> $this->getOrderId(),
+            "payer"=> [
+                "entity_type"=> "individual",
+                "type"=> "customer",
+                "first_name"=> $card->getFirstName(),
+                "last_name"=> $card->getLastName(),
+                "email"=> $card->getEmail(),
+                "identification"=> [
+                    "type"=> "CPF",
+                    "number"=> $card->getHolderDocumentNumber()
+                ],
+            ],
+            "notification_url"=> $this->getNotifyUrl(),
+            "additional_info"=> [
+                "items"=> $this->getItemData(),
+                "payer"=> $payer,
+                "shipments"=> $this->getShipment()
+            ]
+        ];
+
+        return $data;
+    }
+
+    public function getDataBoleto() //https://www.mercadopago.com.br/developers/pt/guides/online-payments/checkout-api/other-payment-ways   => $payment->payment_method_id = "bolbradesco";  date_of_expiration 
+    {   
+        $payer = $this->getPayerData();
+        $customer = $this->getCustomer();
+
+        $data = [
+            "transaction_amount"=> (float)$this->getAmount(),
+            "description"=> $this->getSoftDescriptor(),
+            "external_reference"=> $this->getOrderId(),
+            "payment_method_id "=> "bolbradesco",
+            "date_of_expiration" => $this->getDueDate(),
+            "payer"=> [
+                //"entity_type"=> "individual",
+                //"type"=> "customer",
+                "email"=> $customer->getEmail(),
+                "first_name"=> $customer->getFirstName(),
+                "last_name"=> $customer->getLastName(),
+                "identification"=> [
+                    "type"=> "CPF",
+                    "number"=> $customer->getHolderDocumentNumber()
+                ],
+                "address"=>  [
+                    "street_name" => $customer->getBillingAddress1(),
+                    "street_number" => $customer->getBillingNumber(),
+                    "zip_code" => $customer->getBillingPostcode(),
+                    "neighborhood" => $customer->getBillingDistrict(),
+                    "city" => $customer->getBillingCity(),
+                    "federal_unit" => $customer->getBillingState()
+                ]
+            ],
+            "notification_url"=> $this->getNotifyUrl(),
+            "additional_info"=> [
+                "items"=> $this->getItemData(),
+                "payer"=> $payer,
+                "shipments"=> $this->getShipment()
+            ]
+        ];
+
+        return $data;
+    }
+
+    // https://docs.linxdigital.com.br/docs/mercado-pago-configurando-pix
+    // https://www.mercadopago.com.br/pix-flows
+    // https://www.mercadopago.com.br/ajuda/17843
+    public function getDataPix() //https://www.mercadopago.com.br/developers/pt/guides/online-payments/checkout-api/receiving-payment-by-pix
+    {
+        $payer = $this->getPayerData();
+        $customer = $this->getCustomer();
+
+        $data = [
+            "transaction_amount"=> (float)$this->getAmount(),
+            "description"=> $this->getSoftDescriptor(),
+            "external_reference"=> $this->getOrderId(),
+            "payment_method_id "=> "pix",
+            "date_of_expiration" => $this->getDueDate(),
+            "payer"=> [
+                //"entity_type"=> "individual",
+                //"type"=> "customer",
+                "email"=> $customer->getEmail(),
+                "first_name"=> $customer->getFirstName(),
+                "last_name"=> $customer->getLastName(),
+                "identification"=> [
+                    "type"=> "CPF",
+                    "number"=> $customer->getHolderDocumentNumber()
+                ],
+                "address"=>  [
+                    "street_name" => $customer->getBillingAddress1(),
+                    "street_number" => $customer->getBillingNumber(),
+                    "zip_code" => $customer->getBillingPostcode(),
+                    "neighborhood" => $customer->getBillingDistrict(),
+                    "city" => $customer->getBillingCity(),
+                    "federal_unit" => $customer->getBillingState()
+                ]
+            ],
+            "notification_url"=> $this->getNotifyUrl(),
+            "additional_info"=> [
+                "items"=> $this->getItemData(),
+                "payer"=> $payer,
+                "shipments"=> $this->getShipment()
+            ]
+        ];
+
+        return $data;
+    }
 }

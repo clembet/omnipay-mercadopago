@@ -15,37 +15,26 @@ class AuthorizeRequest extends AbstractRequest
 
     public function getData()
     {
-        $this->validate('cardToken');
+        $this->validate('customer', 'paymentType');
 
-        $payer = $this->getPayerData();
-        $card = $this->getCard();
+        $data = [];
+        switch(strtolower($this->getPaymentType()))
+        {
+            case 'creditcard':
+                $data = $this->getDataCreditCard();
+                break;
 
-        $data = [
-            "token"=> $this->getCardToken(),
-            "capture"=> false,
-            "binary_mode"=>true,
-            "transaction_amount"=> (float)$this->getAmount(),
-            "installments"=> $this->getInstallments(),
-            "description"=> $this->getSoftDescriptor(),
-            "external_reference"=> $this->getOrderId(),
-            "payer"=> [
-                "entity_type"=> "individual",
-                "type"=> "customer",
-                "first_name"=> $card->getFirstName(),
-                "last_name"=> $card->getLastName(),
-                "email"=> $card->getEmail(),
-                "identification"=> [
-                    "type"=> "CPF",
-                    "number"=> $card->getHolderDocumentNumber()
-                ],
-            ],
-            "notification_url"=> $this->getNotifyUrl(),
-            "additional_info"=> [
-                "items"=> $this->getItemData(),
-                "payer"=> $payer,
-                "shipments"=> $this->getShipment()
-            ]
-        ];
+            case 'boleto':
+                $data = $this->getDataBoleto();
+                break;
+
+            case 'pix':
+                $data = $this->getDataPix();
+                break;
+
+            default:
+                $data = $this->getDataCreditCard();
+        }
 
         return $data;
     }

@@ -31,7 +31,7 @@ class Response extends AbstractResponse
             return false;
         }
 
-        if((strcmp($status, "approved")==0) || (strcmp($status, "authorized")==0))
+        if((strcmp($status, "approved")==0) || (strcmp($status, "authorized")==0) || (strcmp($status, "pending")==0) || (strcmp($status, "in_process")==0) || (strcmp($status, "refunded")==0) || (strcmp($status, "cancelled")==0))
             return true;
 
         return false;
@@ -79,6 +79,18 @@ class Response extends AbstractResponse
         return strcmp($status, "authorized")==0;
     }
 
+    public function isPending()
+    {
+        $status = $this->getStatus();
+        return (strcmp($status, "pending")==0 || strcmp($status, "in_process")==0);
+    }
+
+    public function isVoided()
+    {
+        $status = $this->getStatus();
+        return (strcmp($status, "refunded")==0 || strcmp($status, "cancelled")==0);
+    }
+
     /**
      * Get the error message from the response.
      *
@@ -95,5 +107,32 @@ class Response extends AbstractResponse
             return "{$this->data['status']} - {$this->data['message']}";
         
         return null;
+    }
+
+    public function getBoleto()//refazer https://www.mercadopago.com.br/developers/pt/guides/online-payments/checkout-api/other-payment-ways
+    {
+        $data = $this->getData();
+        $boleto = array();
+        $boleto['boleto_url'] = @$data['transaction_details']['external_resource_url'];
+        $boleto['boleto_url_pdf'] = @$data['transaction_details']['external_resource_url'];
+        $boleto['boleto_barcode'] = "";//@$data['transaction_details']['DigitableLine'];//TODO:
+        $boleto['boleto_expiration_date'] = NULL;//@$data['transaction_details']['ExpirationDate'];//TODO:
+        $boleto['boleto_valor'] = (@$data['transaction_details']['total_paid_amount']*1.0);
+        $boleto['boleto_transaction_id'] = @$data['id'];
+        //@$this->setTransactionReference(@$data['transaction_id']);
+
+        return $boleto;
+    }
+
+    public function getPix() // TODO: refazer  https://www.mercadopago.com.br/developers/pt/guides/online-payments/checkout-api/receiving-payment-by-pix
+    {
+        $data = $this->getData();
+        $pix = array();
+        $pix['pix_qrcodebase64image'] = @$data['point_of_interaction']['transaction_data']['qr_code_base64'];
+        $pix['pix_qrcodestring'] = @$data['point_of_interaction']['transaction_data']['qr_code'];
+        $pix['pix_valor'] = (@$data['transaction_details']['total_paid_amount']*1.0);
+        $pix['pix_transaction_id'] = @$data['id'];
+
+        return $pix;
     }
 }

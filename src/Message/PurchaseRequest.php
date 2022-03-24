@@ -8,8 +8,8 @@ class PurchaseRequest extends AuthorizeRequest
     public function getData()
     {
         $data = parent::getData();
-
-        $data["capture"]=true;
+        if(strcmp(strtolower($this->getPaymentType()), "creditcard")==0)
+            $data["capture"]=true;
 
         return $data;
 
