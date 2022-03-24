@@ -109,7 +109,7 @@ class Response extends AbstractResponse
         return null;
     }
 
-    public function getBoleto()//refazer https://www.mercadopago.com.br/developers/pt/guides/online-payments/checkout-api/other-payment-ways
+    public function getBoleto()//https://www.mercadopago.com.br/developers/pt/guides/online-payments/checkout-api/other-payment-ways
     {
         $data = $this->getData();
         $boleto = array();
@@ -124,7 +124,7 @@ class Response extends AbstractResponse
         return $boleto;
     }
 
-    public function getPix() // TODO: refazer  https://www.mercadopago.com.br/developers/pt/guides/online-payments/checkout-api/receiving-payment-by-pix
+    public function getPix() // https://www.mercadopago.com.br/developers/pt/guides/online-payments/checkout-api/receiving-payment-by-pix
     {
         $data = $this->getData();
         $pix = array();

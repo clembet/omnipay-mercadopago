@@ -241,19 +241,19 @@ abstract class AbstractRequest extends \Omnipay\Common\Message\AbstractRequest
 
     public function getPayerData()
     {
-        $card = $this->getCard();
+        $customer = $this->getCustomer();
 
         return [
-            "first_name"=> $card->getFirstName(),
-            "last_name"=> $card->getLastName(),
+            "first_name"=> $customer->getFirstName(),
+            "last_name"=> $customer->getLastName(),
             "phone"=> [
-                "area_code"=> $card->getAreaCode(),
-                "number"=> substr($card->getPhone(), 2, 9)
+                "area_code"=> $customer->getAreaCode(),
+                "number"=> substr($customer->getPhone(), 2, 9)
             ],
             "address"=> [
-                "zip_code"=> $card->getShippingPostcode(),
-                "street_name"=> $card->getShippingAddress1(),
-                "street_number"=> $card->getShippingNumber()
+                "zip_code"=> $customer->getBillingPostcode(),
+                "street_name"=> $customer->getBillingAddress1(),
+                "street_number"=> $customer->getBillingNumber()
             ]
         ];
     }
@@ -372,8 +372,8 @@ abstract class AbstractRequest extends \Omnipay\Common\Message\AbstractRequest
     }
 
     public function getDataBoleto() //https://www.mercadopago.com.br/developers/pt/guides/online-payments/checkout-api/other-payment-ways   => $payment->payment_method_id = "bolbradesco";  date_of_expiration 
-    {   
-        $payer = $this->getPayerData();
+    {
+        //$payer = $this->getPayerData();
         $customer = $this->getCustomer();
 
         $data = [
@@ -402,11 +402,11 @@ abstract class AbstractRequest extends \Omnipay\Common\Message\AbstractRequest
                 ]
             ],
             "notification_url"=> $this->getNotifyUrl(),
-            "additional_info"=> [
+            /*"additional_info"=> [
                 "items"=> $this->getItemData(),
                 "payer"=> $payer,
                 "shipments"=> $this->getShipment()
-            ]
+            ]*/
         ];
 
         return $data;
@@ -417,7 +417,7 @@ abstract class AbstractRequest extends \Omnipay\Common\Message\AbstractRequest
     // https://www.mercadopago.com.br/ajuda/17843
     public function getDataPix() //https://www.mercadopago.com.br/developers/pt/guides/online-payments/checkout-api/receiving-payment-by-pix
     {
-        $payer = $this->getPayerData();
+        //$payer = $this->getPayerData();
         $customer = $this->getCustomer();
 
         $data = [
@@ -446,11 +446,11 @@ abstract class AbstractRequest extends \Omnipay\Common\Message\AbstractRequest
                 ]
             ],
             "notification_url"=> $this->getNotifyUrl(),
-            "additional_info"=> [
+            /*"additional_info"=> [
                 "items"=> $this->getItemData(),
                 "payer"=> $payer,
                 "shipments"=> $this->getShipment()
-            ]
+            ]*/
         ];
 
         return $data;
