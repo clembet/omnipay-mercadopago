@@ -103,8 +103,7 @@ class Response extends AbstractResponse
         //print_r($this->data);
         if(isset($this->data['error']))
             if(!isset($this->data['status']))
-                print_r($this->data);
-            return "{$this->data['status']} - {$this->data['message']}";
+                return "{$this->data['status']} - {$this->data['message']}";
         
         return null;
     }
@@ -128,7 +127,7 @@ class Response extends AbstractResponse
     {
         $data = $this->getData();
         $pix = array();
-        $pix['pix_qrcodebase64image'] = @$data['point_of_interaction']['transaction_data']['qr_code_base64'];
+        $pix['pix_qrcodebase64image'] = 'data:image/png;base64,'.@$data['point_of_interaction']['transaction_data']['qr_code_base64'];
         $pix['pix_qrcodestring'] = @$data['point_of_interaction']['transaction_data']['qr_code'];
         $pix['pix_valor'] = (@$data['transaction_details']['total_paid_amount']*1.0);
         $pix['pix_transaction_id'] = @$data['id'];
