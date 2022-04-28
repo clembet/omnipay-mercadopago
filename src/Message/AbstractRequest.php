@@ -390,7 +390,7 @@ abstract class AbstractRequest extends \Omnipay\Common\Message\AbstractRequest
                 "last_name"=> $customer->getLastName(),
                 "identification"=> [
                     "type"=> "CPF",
-                    "number"=> $customer->getHolderDocumentNumber()
+                    "number"=> $customer->getDocumentNumber()
                 ],
                 "address"=>  [
                     "street_name" => $customer->getBillingAddress1(),
