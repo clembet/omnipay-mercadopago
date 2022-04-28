@@ -176,7 +176,7 @@ abstract class AbstractRequest extends \Omnipay\Common\Message\AbstractRequest
             ++$ano;
         }
 
-        $dueDate = sprintf("%04d-%02d-%02d", $ano, $mes, $dia);
+        $dueDate = sprintf("%04d-%02d-%02dT23:59:59.000-04:00", $ano, $mes, $dia);
         $this->setDueDate($dueDate);
 
         return $dueDate;
@@ -380,8 +380,8 @@ abstract class AbstractRequest extends \Omnipay\Common\Message\AbstractRequest
             "transaction_amount"=> (float)$this->getAmount(),
             "description"=> $this->getSoftDescriptor(),
             "external_reference"=> $this->getOrderId(),
-            "payment_method_id "=> "bolbradesco",
-            "date_of_expiration" => $this->getDueDate(),
+            "payment_method_id"=> "bolbradesco",
+            "date_of_expiration" => $this->getDueDate(), // formato (yyyy-MM-dd'T'HH:mm:ssz)
             "payer"=> [
                 //"entity_type"=> "individual",
                 //"type"=> "customer",
@@ -424,8 +424,8 @@ abstract class AbstractRequest extends \Omnipay\Common\Message\AbstractRequest
             "transaction_amount"=> (float)$this->getAmount(),
             "description"=> $this->getSoftDescriptor(),
             "external_reference"=> $this->getOrderId(),
-            "payment_method_id "=> "pix",
-            "date_of_expiration" => $this->getDueDate(),
+            "payment_method_id"=> "pix",
+            "date_of_expiration" => $this->getDueDate(), // formato (yyyy-MM-dd'T'HH:mm:ssz)
             "payer"=> [
                 //"entity_type"=> "individual",
                 //"type"=> "customer",
@@ -434,7 +434,7 @@ abstract class AbstractRequest extends \Omnipay\Common\Message\AbstractRequest
                 "last_name"=> $customer->getLastName(),
                 "identification"=> [
                     "type"=> "CPF",
-                    "number"=> $customer->getHolderDocumentNumber()
+                    "number"=> $customer->getDocumentNumber()
                 ],
                 "address"=>  [
                     "street_name" => $customer->getBillingAddress1(),
